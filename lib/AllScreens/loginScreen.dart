@@ -1,9 +1,16 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:uber_user/AllScreens/mainscreen.dart';
 import 'package:uber_user/AllScreens/registerationScreen.dart';
+import 'package:uber_user/main.dart';
 
 class LoginScreen extends StatelessWidget {
   static const String idScreen = "login";
+
+  TextEditingController emailTextEditingController = TextEditingController();
+  TextEditingController passwordTextEditingController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -39,13 +46,15 @@ class LoginScreen extends StatelessWidget {
                       height: 1.0,
                     ),
                     TextField(
+                      controller: emailTextEditingController,
                       keyboardType: TextInputType.emailAddress,
                       decoration: InputDecoration(
                         labelText: "Email",
                         labelStyle: TextStyle(
                           fontSize: 18.0,
                         ),
-                        hintStyle: TextStyle(color: Colors.grey, fontSize: 10.0),
+                        hintStyle:
+                            TextStyle(color: Colors.grey, fontSize: 10.0),
                       ),
                       style: TextStyle(fontSize: 14),
                     ),
@@ -53,13 +62,15 @@ class LoginScreen extends StatelessWidget {
                       height: 1.0,
                     ),
                     TextField(
+                      controller: passwordTextEditingController,
                       obscureText: true,
                       decoration: InputDecoration(
                         labelText: "Password",
                         labelStyle: TextStyle(
                           fontSize: 18.0,
                         ),
-                        hintStyle: TextStyle(color: Colors.grey, fontSize: 10.0),
+                        hintStyle:
+                            TextStyle(color: Colors.grey, fontSize: 10.0),
                       ),
                       style: TextStyle(fontSize: 14),
                     ),
@@ -86,26 +97,66 @@ class LoginScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(24),
                       ),
                       onPressed: () {
-                        print("Login button clicked");
+                        if (!emailTextEditingController.text.contains("@")) {
+                          displayToastMessage(
+                              "Email address is not Valid.", context);
+                        } else if (passwordTextEditingController.text.isEmpty) {
+                          displayToastMessage("Password is mandatory", context);
+                        } else {
+                          loginAndAuthenticateUser(context);
+                        }
                       },
                     ),
                   ],
                 ),
               ),
               FlatButton(
-                onPressed: ()
-                {
-                  Navigator.pushNamedAndRemoveUntil(context, RegisterationScreen.idScreen, (route) => false);
+                onPressed: () {
+                  Navigator.pushNamedAndRemoveUntil(
+                      context, RegisterationScreen.idScreen, (route) => false);
                 },
-                 child: Text(
-                   "Do have an Account? Register Here.",
-                   style: TextStyle(fontSize: 16,color: Colors.black,fontFamily: 'Brand Bold'),
-                 ),
+                child: Text(
+                  "Do have an Account? Register Here.",
+                  style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.black,
+                      fontFamily: 'Brand Bold'),
+                ),
               ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  void loginAndAuthenticateUser(BuildContext context) async {
+    final User firebaseUser = (await _firebaseAuth
+            .signInWithEmailAndPassword(
+                email: emailTextEditingController.text,
+                password: passwordTextEditingController.text)
+            .catchError((errMsg) {
+      displayToastMessage("Error: " + errMsg.toString(), context);
+    }))
+        .user;
+
+    if (firebaseUser != null) {
+      userRef.child(firebaseUser.uid).once().then((DataSnapshot snap) {
+        if (snap.value != null) {
+          Navigator.pushNamedAndRemoveUntil(
+              context, MainScreen.idScreen, (route) => false);
+          displayToastMessage("Your are logged_in now", context);
+        } else {
+          _firebaseAuth.signOut();
+          displayToastMessage(
+              "No record exists for this user . Please create new account.",
+              context);
+        }
+      });
+    } else {
+      // error occured = display error msg
+      displayToastMessage("Error Occurred, can not Login", context);
+    }
   }
 }

@@ -133,22 +133,24 @@ class RegisterationScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(24),
                       ),
                       onPressed: () {
-                        if(nameTextEditingController.text.length < 3)
-                        {
-                          displayToastMessage("Name must be at least 3 characters.", context);
-                        } else if(!emailTextEditingController.text.contains("@")){
-                          displayToastMessage("Email address is not Valid.", context);
-                        }else if(passwordTextEditingController.text.isEmpty){
-
-                          displayToastMessage("Phone Number is mandatory ", context);
-                        } else if (passwordTextEditingController.text.length < 6){
-                              
-                          displayToastMessage("Password must be at least 6 Characters", context);
-                        }
-                        else{
+                        if (nameTextEditingController.text.length < 3) {
+                          displayToastMessage(
+                              "Name must be at least 3 characters.", context);
+                        } else if (!emailTextEditingController.text
+                            .contains("@")) {
+                          displayToastMessage(
+                              "Email address is not Valid.", context);
+                        } else if (passwordTextEditingController.text.isEmpty) {
+                          displayToastMessage(
+                              "Phone Number is mandatory ", context);
+                        } else if (passwordTextEditingController.text.length <
+                            6) {
+                          displayToastMessage(
+                              "Password must be at least 6 Characters",
+                              context);
+                        } else {
                           registerNewUser(context);
                         }
-
                       },
                     ),
                   ],
@@ -179,13 +181,14 @@ class RegisterationScreen extends StatelessWidget {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
   void registerNewUser(BuildContext context) async {
-    final User firebaseUser =
-        (await _firebaseAuth.createUserWithEmailAndPassword(
+    final User firebaseUser = (await _firebaseAuth
+            .createUserWithEmailAndPassword(
                 email: emailTextEditingController.text,
-                password: passwordTextEditingController.text).catchError((errMsg){
-                  displayToastMessage("Error: " + errMsg.toString(), context);
-        }))
-            .user;
+                password: passwordTextEditingController.text)
+            .catchError((errMsg) {
+      displayToastMessage("Error: " + errMsg.toString(), context);
+    }))
+        .user;
 
     if (firebaseUser != null) // User Created
     {
@@ -196,21 +199,18 @@ class RegisterationScreen extends StatelessWidget {
         "phone": phoneTextEditingController.text.trim(),
       };
       userRef.child(firebaseUser.uid).set(userDataMap);
-      displayToastMessage("Congratulation, your account has been created.", context);
+      displayToastMessage(
+          "Congratulation, your account has been created.", context);
 
-      Navigator.pushNamedAndRemoveUntil(context, MainScreen.idScreen, (route) => false);
-
-
-    }
-    else {
+      Navigator.pushNamedAndRemoveUntil(
+          context, MainScreen.idScreen, (route) => false);
+    } else {
       // error occured = display error msg
       displayToastMessage("New user account has not been Created", context);
     }
   }
-
 }
 
-displayToastMessage( String message, BuildContext context)
-{
+displayToastMessage(String message, BuildContext context) {
   Fluttertoast.showToast(msg: message);
 }
