@@ -3,6 +3,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:uber_user/AllScreens/loginScreen.dart';
+import 'package:uber_user/AllScreens/mainscreen.dart';
+import 'package:uber_user/main.dart';
 
 class RegisterationScreen extends StatelessWidget {
   static const String idScreen = "register";
@@ -131,11 +133,22 @@ class RegisterationScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(24),
                       ),
                       onPressed: () {
-                        if(nameTextEditingController.text.length < 4)
+                        if(nameTextEditingController.text.length < 3)
                         {
+                          displayToastMessage("Name must be at least 3 characters.", context);
+                        } else if(!emailTextEditingController.text.contains("@")){
+                          displayToastMessage("Email address is not Valid.", context);
+                        }else if(passwordTextEditingController.text.isEmpty){
 
+                          displayToastMessage("Phone Number is mandatory ", context);
+                        } else if (passwordTextEditingController.text.length < 6){
+                              
+                          displayToastMessage("Password must be at least 6 Characters", context);
                         }
-                        registerNewUser(context);
+                        else{
+                          registerNewUser(context);
+                        }
+
                       },
                     ),
                   ],
@@ -164,18 +177,34 @@ class RegisterationScreen extends StatelessWidget {
   // Firebass Singup Resister code
 
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+
   void registerNewUser(BuildContext context) async {
-    final FirebaseUser firebaseAuth =
+    final User firebaseUser =
         (await _firebaseAuth.createUserWithEmailAndPassword(
                 email: emailTextEditingController.text,
-                password: passwordTextEditingController.text))
+                password: passwordTextEditingController.text).catchError((errMsg){
+                  displayToastMessage("Error: " + errMsg.toString(), context);
+        }))
             .user;
 
-    if (firebaseAuth != null) // User Created
+    if (firebaseUser != null) // User Created
     {
       // save user info to database
-    } else {
+      Map userDataMap = {
+        "name": nameTextEditingController.text.trim(),
+        "email": emailTextEditingController.text.trim(),
+        "phone": phoneTextEditingController.text.trim(),
+      };
+      userRef.child(firebaseUser.uid).set(userDataMap);
+      displayToastMessage("Congratulation, your account has been created.", context);
+
+      Navigator.pushNamedAndRemoveUntil(context, MainScreen.idScreen, (route) => false);
+
+
+    }
+    else {
       // error occured = display error msg
+      displayToastMessage("New user account has not been Created", context);
     }
   }
 
