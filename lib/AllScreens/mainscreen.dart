@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:uber_user/AllWidgets/Divider.dart';
+import 'package:uber_user/Assistants/assistantMethods.dart';
 
 class MainScreen extends StatefulWidget {
   static const String idScreen = "mainScreen";
@@ -22,6 +23,7 @@ class _MainScreenState extends State<MainScreen> {
   double bottomPaddingOfMAp = 0;
 
   void locatePosition ()async{
+
     Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
     currentPosition = position;
 
@@ -29,6 +31,9 @@ class _MainScreenState extends State<MainScreen> {
 
     CameraPosition cameraPosition = CameraPosition(target: latLatPosition,zoom: 14);
     newGoogleMapController.animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+
+    String address = await AssistantMethods.searchCoordinateAddress(position);
+    print("This is your Address ::" + address);
 
   }
 

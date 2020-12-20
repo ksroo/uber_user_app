@@ -35,6 +35,9 @@ dependencies:
   fluttertoast: ^7.1.6
   google_maps_flutter: ^1.0.6
   geolocator: ^6.1.13
+  http: ^0.12.2
+
+
   
 
 
