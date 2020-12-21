@@ -3,8 +3,10 @@ import 'package:geolocator/geolocator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:uber_user/AllWidgets/Divider.dart';
 import 'package:uber_user/Assistants/assistantMethods.dart';
+import 'package:uber_user/DataHandler/appData.dart';
 
 class MainScreen extends StatefulWidget {
   static const String idScreen = "mainScreen";
@@ -22,21 +24,22 @@ class _MainScreenState extends State<MainScreen> {
   var geoLocator = Geolocator();
   double bottomPaddingOfMAp = 0;
 
-  void locatePosition ()async{
-
-    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+  void locatePosition() async {
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
     currentPosition = position;
 
-    LatLng latLatPosition = LatLng(position.latitude,position.latitude);
+    LatLng latLatPosition = LatLng(position.latitude, position.latitude);
 
-    CameraPosition cameraPosition = CameraPosition(target: latLatPosition,zoom: 14);
-    newGoogleMapController.animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+    CameraPosition cameraPosition =
+        CameraPosition(target: latLatPosition, zoom: 14);
+    newGoogleMapController
+        .animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
 
-    String address = await AssistantMethods.searchCoordinateAddress(position);
+    String address =
+        await AssistantMethods.searchCoordinateAddress(position, context);
     print("This is your Address ::" + address);
-
   }
-
 
   static final CameraPosition _kGooglePlex = CameraPosition(
     target: LatLng(37.42796133580664, -122.085749655962),
@@ -141,7 +144,6 @@ class _MainScreenState extends State<MainScreen> {
                 bottomPaddingOfMAp = 320.0;
               });
 
-
               locatePosition();
             },
           ),
@@ -152,8 +154,7 @@ class _MainScreenState extends State<MainScreen> {
             top: 45,
             left: 22,
             child: GestureDetector(
-              onTap: ()
-              {
+              onTap: () {
                 scaffoldKey.currentState.openDrawer();
               },
               child: Container(
@@ -269,7 +270,12 @@ class _MainScreenState extends State<MainScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "Add Home",
+                              Provider.of<AppData>(context).pickUpLocation !=
+                                      null
+                                  ? Provider.of<AppData>(context)
+                                      .pickUpLocation
+                                      .placeName
+                                  : "Add Home",
                               style: TextStyle(color: Colors.black),
                             ),
                             SizedBox(
