@@ -30,7 +30,7 @@ class _MainScreenState extends State<MainScreen> {
         desiredAccuracy: LocationAccuracy.high);
     currentPosition = position;
 
-    LatLng latLatPosition = LatLng(position.latitude, position.latitude);
+    LatLng latLatPosition = LatLng(position.latitude, position.longitude);
 
     CameraPosition cameraPosition =
         CameraPosition(target: latLatPosition, zoom: 14);
